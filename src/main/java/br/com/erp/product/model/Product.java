@@ -36,6 +36,8 @@ public class Product {
 
     private String category;
 
+    private String subcategory;
+
     private String brand;
 
     @Column(nullable = false, precision = 10, scale = 2)
@@ -55,14 +57,16 @@ public class Product {
 
     private String unitOfMeasure;
 
+    
+    @NotNull(message = "O status (ativo/inativo) é obrigatório.")
+    private boolean active;
     // --- Campos de Auditoria ---
 
     @CreationTimestamp // O Hibernate vai preencher com a data/hora de criação automaticamente
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
-    @UpdateTimestamp // O Hibernate vai preencher com a data/hora da última atualização
-                     
+    @UpdateTimestamp // O Hibernate vai preencher com a data/hora da última atualização   
     @Column(nullable = false)
     private Instant updatedAt;
 
