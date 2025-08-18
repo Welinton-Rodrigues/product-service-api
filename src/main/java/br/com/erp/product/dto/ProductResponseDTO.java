@@ -8,6 +8,7 @@ import java.time.Instant;
 public record ProductResponseDTO(
 
         Long id,
+        String sku,
         String eanGtin,
         String name,
         String category,

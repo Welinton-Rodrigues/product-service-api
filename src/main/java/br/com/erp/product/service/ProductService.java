@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -30,12 +31,14 @@ public class ProductService {
             }
         }
 
-        Product newProduct = new Product();
-        mapDtoToEntity(dto, newProduct);
+     Product newProduct = new Product();
+    mapDtoToEntity(dto, newProduct);
+    
+    newProduct.setSku(generateSku());
 
-        Product savedProduct = productRepository.save(newProduct);
-        return convertToDto(savedProduct);
-    }
+    Product savedProduct = productRepository.save(newProduct);
+    return convertToDto(savedProduct);
+}
 
     @Transactional(readOnly = true)
     public ProductResponseDTO getProductById(Long id) {
@@ -43,8 +46,7 @@ public class ProductService {
         return convertToDto(product);
     }
 
-    @Transactional(readOnly = true)
-    public Page<ProductResponseDTO> getAllProducts(String name, String category, Boolean noStock, Pageable pageable) {
+public Page<ProductResponseDTO> getAllProducts(String name, String category, Boolean noStock, Pageable pageable) {
     Specification<Product> spec = Specification.where(null);
 
     if (name != null && !name.isBlank()) {
@@ -102,9 +104,18 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Produto com ID " + id + " não encontrado."));
     }
 
+    private String generateSku() {
+    var lastProduct = productRepository.findAll(Sort.by(Sort.Direction.DESC, "id")).stream().findFirst();
+    
+    long nextId = lastProduct.map(product -> product.getId() + 1).orElse(1L);
+    
+    return "PROD-" + String.format("%06d", nextId);
+}
+
     private ProductResponseDTO convertToDto(Product product) {
         return new ProductResponseDTO(
                 product.getId(),
+                product.getSku(),
                 product.getEanGtin(),
                 product.getName(),
                 product.getCategory(),
@@ -120,6 +131,7 @@ public class ProductService {
 
     private void mapDtoToEntity(ProductCreateDTO dto, Product product) {
         product.setEanGtin(dto.eanGtin());
+        product.setSku(dto.sku());
         product.setName(dto.name());
         product.setCategory(dto.category());
         product.setSubcategory(dto.subcategory());
@@ -131,6 +143,7 @@ public class ProductService {
     }
 
     private void mapDtoToEntity(ProductUpdateDTO dto, Product product) {
+        product.setSku(dto.sku());
         product.setEanGtin(dto.eanGtin());
         product.setName(dto.name());
         product.setCategory(dto.category());

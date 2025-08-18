@@ -21,7 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
@@ -54,21 +54,23 @@ public class ProductController {
         }
 
         @Operation(summary = "Lista todos os produtos", description = "Retorna uma lista paginada de produtos, com filtros opcionais.")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Lista de produtos retornada com sucesso") })
-        @GetMapping
-        public ResponseEntity<Page<ProductResponseDTO>> getAllProducts(
-                        @Parameter(description = "Filtrar por nome do produto (busca parcial)", example = "Caneta") @RequestParam(required = false) String name,
+@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Lista de produtos retornada com sucesso") })
+@GetMapping
+public ResponseEntity<Page<ProductResponseDTO>> getAllProducts(
+        @Parameter(description = "Filtrar por nome do produto (busca parcial)")
+        @RequestParam(required = false) String name,
+        
+        @Parameter(description = "Filtrar por categoria do produto")
+        @RequestParam(required = false) String category,
 
-                        @Parameter(description = "Filtrar por categoria do produto", example = "Papelaria") @RequestParam(required = false) String category,
+        @Parameter(description = "Filtrar apenas produtos com estoque zerado")
+        @RequestParam(required = false) Boolean noStock,
 
-                        @Parameter(description = "Filtrar apenas produtos com estoque zerado", example = "true") @RequestParam(required = false) Boolean noStock,
-
-                        @ParameterObject Pageable pageable) {
-
-                Page<ProductResponseDTO> products = productService.getAllProducts(name, category, noStock, pageable);
-                return ResponseEntity.ok(products);
-        }
+        @ParameterObject Pageable pageable) {
+            
+    Page<ProductResponseDTO> products = productService.getAllProducts(name, category, noStock, pageable);
+    return ResponseEntity.ok(products);
+}
 
         @Operation(summary = "Atualiza um produto existente", description = "Atualiza todos os dados de um produto com base no seu ID.")
         @ApiResponses(value = {
